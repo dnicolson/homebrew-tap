@@ -30,16 +30,22 @@ class Cartool < Formula
   depends_on xcode: "12.0"
 
   def install
-    system "xcodebuild
-            -resolvePackageDependencies"
+    xcodebuild_sandbox_workaround = [
+      "OTHER_SWIFT_FLAGS=$(inherited) -disable-sandbox",
+      "-IDEPackageSupportDisableManifestSandbox=1"
+    ]
 
-    system "xcodebuild
-            -project Cartools.xcodeproj
-            -scheme cartool
-            -configuration Release
-            -arch x86_64
-            -sdk macosx
-            -derivedDataPath .build"
+    system "xcodebuild",
+           *xcodebuild_sandbox_workaround,
+           "-resolvePackageDependencies"
+
+    system "xcodebuild",
+           *xcodebuild_sandbox_workaround,
+           "-project", "Cartools.xcodeproj",
+           "-scheme", "cartool",
+           "-configuration", "Release",
+           "-sdk", "macosx",
+           "-derivedDataPath", ".build"
 
     bin.install ".build/Build/Products/Release/cartool"
   end
